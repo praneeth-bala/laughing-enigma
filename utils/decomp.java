@@ -206,6 +206,38 @@ class AndroidXMLDecompress {
         } // end of LEW
         
         
+        public static String getXML(String infilename) throws IOException{
+                InputStream is = null;
+                byte[] buf = new byte[1000000];
+                
+                if (infilename.endsWith(".apk") || infilename.endsWith(".zip")) {
+                        is = new FileInputStream(infilename);
+                        ZipInputStream zis = new ZipInputStream(is);
+                        ZipEntry entry = zis.getNextEntry();
+                        while(entry != null) {
+                                if(entry.getName().equals("AndroidManifest.xml")) {
+                                        int size = (int)entry.getSize();
+                                        int read = 0;
+                                        while (read < size) {
+                                                read += zis.read(buf, read, (size - read));
+                                        }
+                                }
+                                entry = zis.getNextEntry();
+                        }
+                        zis.close();
+                        
+                } else {
+                        is = new FileInputStream(infilename);
+                        is.read(buf);
+                }
+
+                is.close();
+                
+                String xml = AndroidXMLDecompress.decompressXML(buf);
+                return xml;
+                // System.out.println(xml);
+        }
+        
         
         
         public static void main(String[] args) throws IOException {
