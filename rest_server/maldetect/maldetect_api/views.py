@@ -5,7 +5,7 @@ from rest_framework import permissions
 from .models import XML
 from .serializers import XMLSerializer
 
-from .utils import empty
+from .utils import is_malicious
 
 class XMLApiView(APIView):
 
@@ -16,6 +16,6 @@ class XMLApiView(APIView):
         serializer = XMLSerializer(data=data)
         if serializer.is_valid():
             # serializer.save()
-            return Response({"array":empty()}, status=status.HTTP_201_CREATED)
+            return Response({"is_malicious": is_malicious(data['xml'])}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
