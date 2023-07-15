@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
 class AndroidXMLDecompress {
         // decompressXML -- Parse the 'compressed' binary form of Android XML docs
@@ -211,20 +210,17 @@ class AndroidXMLDecompress {
                 byte[] buf = new byte[1000000];
                 
                 if (infilename.endsWith(".apk") || infilename.endsWith(".zip")) {
-                        is = new FileInputStream(infilename);
-                        ZipInputStream zis = new ZipInputStream(is);
-                        ZipEntry entry = zis.getNextEntry();
-                        while(entry != null) {
-                                if(entry.getName().equals("AndroidManifest.xml")) {
-                                        int size = (int)entry.getSize();
-                                        int read = 0;
-                                        while (read < size) {
-                                                read += zis.read(buf, read, (size - read));
-                                        }
-                                }
-                                entry = zis.getNextEntry();
+                        ZipFile zif = new ZipFile(infilename);
+                        InputStream zis = zif.getInputStream(zif.getEntry("AndroidManifest.xml"));
+                        int ptr=0;
+                        int read=0;
+                        read = zis.read(buf);
+                        ptr = read;
+                        while (read!=-1) {
+                                read = zis.read(buf, ptr, 1);
+                                ptr+=read;
                         }
-                        zis.close();
+                        zif.close();
                         
                 } else {
                         is = new FileInputStream(infilename);
@@ -249,32 +245,29 @@ class AndroidXMLDecompress {
                 byte[] buf = new byte[1000000];
                 
                 if (infilename.endsWith(".apk") || infilename.endsWith(".zip")) {
-                        is = new FileInputStream(infilename);
-                        ZipInputStream zis = new ZipInputStream(is);
-                        ZipEntry entry = zis.getNextEntry();
-                        while(entry != null) {
-                                if(entry.getName().equals("AndroidManifest.xml")) {
-                                        int size = (int)entry.getSize();
-                                        int read = 0;
-                                        while (read < size) {
-                                                read += zis.read(buf, read, (size - read));
-                                        }
-                                }
-                                entry = zis.getNextEntry();
+                        ZipFile zif = new ZipFile(infilename);
+                        InputStream zis = zif.getInputStream(zif.getEntry("AndroidManifest.xml"));
+                        int ptr=0;
+                        int read=0;
+                        read = zis.read(buf);
+                        ptr = read;
+                        while (read!=-1) {
+                                read = zis.read(buf, ptr, 1);
+                                ptr+=read;
                         }
-                        zis.close();
+                        zif.close();
                         
                 } else {
                         is = new FileInputStream(infilename);
                         is.read(buf);
+                        is.close();
                 }
-
-                is.close();
                 
                 String xml = AndroidXMLDecompress.decompressXML(buf);
+                System.out.println(xml.length());
                 os = new FileOutputStream(outfilename);
                 os.write(xml.getBytes(Charset.forName("UTF-8")));
                 os.close();
-                // System.out.println(xml);
+                
         }
 }
