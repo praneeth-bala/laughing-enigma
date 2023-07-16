@@ -7,8 +7,10 @@ from maldetect.settings import BASE_DIR
 def get_feat_vector(file):
     with open(os.path.join(BASE_DIR,"./maldetect_api/feat_store/perm_headers.pkl"), "rb") as f:
         perm_words = pickle.loads(f.read())
-    
-    vector = [0]*len(perm_words)
+    with open(os.path.join(BASE_DIR,"./maldetect_api/feat_store/int_headers.pkl"), "rb") as f:
+        int_words = pickle.loads(f.read())
+
+    vector = [0]*(len(perm_words)+len(int_words))
     lines = file.split('<')
     for line in lines:
         if line.startswith("uses-permission") or line.startswith("uses-permission-sdk-23") or line.startswith("permission"):
@@ -17,6 +19,14 @@ def get_feat_vector(file):
                 try:
                     ind = perm_words.index(word)
                     vector[ind]=1
+                except:
+                    pass
+        elif line.startswith("action") or line.startswith("category"):
+            words = line.split('"')
+            for word in words:
+                try:
+                    ind = int_words.index(word)
+                    vector[len(perm_words)+ind]=1
                 except:
                     pass
     return vector

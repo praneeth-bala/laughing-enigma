@@ -9,7 +9,12 @@ import pickle
 pbdf = pd.read_csv("permission_benign.csv")
 pmdf = pd.read_csv("permission_malware.csv")
 
+pbdf2 = pd.read_csv("intent_benign.csv")
+pmdf2 = pd.read_csv("intent_malware.csv")
+
 perm_list = list(pbdf.columns)[1:]
+int_list = list(pbdf2.columns)[1:]
+
 
 with open("./perm_headers.pkl", "wb") as f:
     f.write(pickle.dumps(perm_list))
@@ -17,18 +22,25 @@ with open("./perm_headers.pkl", "wb") as f:
 with open("./perm_headers.pkl", "rb") as f:
     perm_list = pickle.loads(f.read())
 
+with open("./int_headers.pkl", "wb") as f:
+    f.write(pickle.dumps(int_list))
+
+with open("./int_headers.pkl", "rb") as f:
+    int_list = pickle.loads(f.read())
+
 model = DecisionTreeClassifier()
 
 #Initialize malware and benign vectors from drebin csv
 benign=[]
 bfnames=pbdf["Unnamed: 0"].tolist()
+assert len(bfnames)==len(pbdf2["Unnamed: 0"].tolist())
 for x in tqdm.tqdm(bfnames):
-    benign.append(pbdf[pbdf["Unnamed: 0"]==x].to_numpy()[0][1:].astype(np.float32))
+    benign.append(np.concatenate(((pbdf[pbdf["Unnamed: 0"]==x].to_numpy()[0][1:].astype(np.float32)),pbdf2[pbdf2["Unnamed: 0"]==x].to_numpy()[0][1:].astype(np.float32))))
 
 malware=[]
 mfnames=pmdf["Unnamed: 0"].tolist()
 for x in tqdm.tqdm(mfnames):
-      malware.append(pmdf[pmdf["Unnamed: 0"]==x].to_numpy()[0][1:].astype(np.float32))
+      malware.append(np.concatenate(((pmdf[pmdf["Unnamed: 0"]==x].to_numpy()[0][1:].astype(np.float32)),pmdf2[pmdf2["Unnamed: 0"]==x].to_numpy()[0][1:].astype(np.float32))))
 
 random.seed(111)
 blabel=[0 for i in range(len(benign))]
