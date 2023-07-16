@@ -225,9 +225,9 @@ class AndroidXMLDecompress {
                 } else {
                         is = new FileInputStream(infilename);
                         is.read(buf);
+                        is.close();
                 }
 
-                is.close();
                 
                 String xml = AndroidXMLDecompress.decompressXML(buf);
                 return xml;
